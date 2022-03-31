@@ -17,11 +17,15 @@ class AuthenticatedClientFactory(object):
     Use the class to get clients for supported endpoints and authenticate them with the stored credentials.
     """
 
-    def __init__(self, host,
-                 cookie=None,
-                 oauth_token=None,
-                 username=None, password=None,
-                 verify_ssl=True):
+    def __init__(
+        self,
+        host,
+        cookie=None,
+        oauth_token=None,
+        username=None,
+        password=None,
+        verify_ssl=True,
+    ):
         """Initialize."""
         self.host = host
         self.cookie = cookie
@@ -36,10 +40,7 @@ class AuthenticatedClientFactory(object):
             urllib3.disable_warnings()
 
     def _decorate_endpoint(self, endpoint_path, over_ssl=False):
-        return 'http{}://{}/{}'.format(
-            's' if over_ssl else '',
-            self.host,
-            endpoint_path)
+        return "http{}://{}/{}".format("s" if over_ssl else "", self.host, endpoint_path)
 
     @staticmethod
     def get_endpoint(service=None):
@@ -49,15 +50,15 @@ class AuthenticatedClientFactory(object):
         If no service is specified, obtain a list of the supported services.
         """
         endpoints = {
-            'AccessManagement': '4.0',
-            'Auth': '4.2',
-            'RemoteRecorderManagement': '4.2',
-            'SessionManagement': '4.6',
-            'UsageReporting': '4.0',
-            'UserManagement': '4.0'
+            "AccessManagement": "4.0",
+            "Auth": "4.2",
+            "RemoteRecorderManagement": "4.2",
+            "SessionManagement": "4.6",
+            "UsageReporting": "4.0",
+            "UserManagement": "4.0",
         }
         if service and service in endpoints:
-            return 'Panopto/PublicAPI/{}/{}.svc'.format(endpoints[service], service)
+            return "Panopto/PublicAPI/{}/{}.svc".format(endpoints[service], service)
         else:
             return sorted(endpoints.keys())
 
@@ -73,14 +74,16 @@ class AuthenticatedClientFactory(object):
         if not self.verify_ssl:
             from requests import Session
             from zeep.transports import Transport
+
             session = Session()
             session.verify = False
             transport = Transport(session=session)
         if endpoint in AuthenticatedClientFactory.get_endpoint():
             endpoint = AuthenticatedClientFactory.get_endpoint(endpoint)
         client = Client(
-            wsdl=self._decorate_endpoint(endpoint, over_ssl) + '?singleWsdl',
-            transport=transport)
+            wsdl=self._decorate_endpoint(endpoint, over_ssl) + "?singleWsdl",
+            transport=transport,
+        )
         if authenticate_now:
             self.authenticate_client(client)
         if as_wrapper:
@@ -93,28 +96,34 @@ class AuthenticatedClientFactory(object):
         if self.oauth_token:
             # call "legacy" auth REST endpoint to get a cookie from an oauth token
             response = urllib3.PoolManager().request(
-                'GET',
-                'https://{}/Panopto/api/v1/auth/legacyLogin'.format(self.host),
-                headers={'Authorization': 'Bearer ' + self.oauth_token})
+                "GET",
+                "https://{}/Panopto/api/v1/auth/legacyLogin".format(self.host),
+                headers={"Authorization": "Bearer " + self.oauth_token},
+            )
             if response.status == 200:
-                self.cookie = response.headers['Set-Cookie']
+                self.cookie = response.headers["Set-Cookie"]
                 return True
         else:
             # need to hit SOAP auth endpoint over ssl to get cookie
             # but we might not be authenticated yet so explicitly don't authenticate the auth client!
-            auth_endpoint = AuthenticatedClientFactory.get_endpoint('Auth')  # Panopto/PublicAPI/4.2/Auth.svc'
-            auth_client = self.get_client(auth_endpoint, authenticate_now=False, as_wrapper=False)
+            auth_endpoint = AuthenticatedClientFactory.get_endpoint(
+                "Auth"
+            )  # Panopto/PublicAPI/4.2/Auth.svc'
+            auth_client = self.get_client(
+                auth_endpoint, authenticate_now=False, as_wrapper=False
+            )
             auth_service = auth_client.create_service(
-                binding_name='{http://tempuri.org/}BasicHttpBinding_IAuth',
-                address=self._decorate_endpoint(auth_endpoint, over_ssl=True))
+                binding_name="{http://tempuri.org/}BasicHttpBinding_IAuth",
+                address=self._decorate_endpoint(auth_endpoint, over_ssl=True),
+            )
 
             # need to pick apart raw response to get the cookie
             with auth_client.settings(raw_response=True):
                 response = auth_service.LogOnWithPassword(
-                    userKey=self.username,
-                    password=self.password)
+                    userKey=self.username, password=self.password
+                )
                 if response.status_code == 200:
-                    self.cookie = response.headers['Set-Cookie']
+                    self.cookie = response.headers["Set-Cookie"]
                     return True
 
         return False
@@ -128,5 +137,5 @@ class AuthenticatedClientFactory(object):
         if self.cookie is None:
             if not self.authenticate_factory():
                 return False
-        client.transport.session.headers.update({'Cookie': self.cookie})
+        client.transport.session.headers.update({"Cookie": self.cookie})
         return True

@@ -22,7 +22,11 @@ class ClientWrapper(object):
         Some operations return nothing, so their output signature is the empty string. Map that to None.
         Otherwise, rip apart the signature into names and types.
         """
-        return {t[0]: t[1] for t in [s.split(': ') for s in op_sig.split(', ')]} if op_sig else None
+        return (
+            {t[0]: t[1] for t in [s.split(": ") for s in op_sig.split(", ")]}
+            if op_sig
+            else None
+        )
 
     @staticmethod
     def _parse_element_signature(el_sig):
@@ -33,33 +37,37 @@ class ClientWrapper(object):
         sample complex element: ns0:GetUserDetailedUsage(
                 auth: ns2:AuthenticationInfo, userId: ns1:guid, pagination: ns2:Pagination)
         """
-        element_pattern = r'^(?P<namespace>[^:]+):(?P<name>[^\(]+)\((?P<memberlist>[^\)]+)\)$'
+        element_pattern = (
+            r"^(?P<namespace>[^:]+):(?P<name>[^\(]+)\((?P<memberlist>[^\)]+)\)$"
+        )
         match = re.match(element_pattern, el_sig)
         if match:
             memberlist = []
             # sample named type: folderId: ns1:guid
             # sample unnamed type: xsd:unsignedByte
-            for member_components in [m.split(':') for m in match.group('memberlist').split(', ')]:
+            for member_components in [
+                m.split(":") for m in match.group("memberlist").split(", ")
+            ]:
                 # anytype is special case, it is basically null (or None in python)
-                if len(member_components) == 1 and member_components[0] == 'None':
+                if len(member_components) == 1 and member_components[0] == "None":
                     memberlist.append(None)
                 else:
                     try:
                         # name field is optional (not present for unnamed simple types), so parse from the back
                         member = {
-                            'namepsace': member_components[-2].strip(),
-                            'type': member_components[-1]
+                            "namepsace": member_components[-2].strip(),
+                            "type": member_components[-1],
                         }
                         if len(member_components) == 3:
-                            member['name'] = member_components[0]
+                            member["name"] = member_components[0]
                         memberlist.append(member)
                     except Exception:
                         raise Exception(member_components)
 
             return {
-                'namespace': match.group('namespace'),
-                'name': match.group('name'),
-                'members': memberlist
+                "namespace": match.group("namespace"),
+                "name": match.group("name"),
+                "members": memberlist,
             }
 
     @staticmethod
@@ -70,14 +78,14 @@ class ClientWrapper(object):
         if el_sig:
             return el_sig
         else:
-            ns, name = t_sig.split(':')
-            return {'namespace': ns, 'name': name}
+            ns, name = t_sig.split(":")
+            return {"namespace": ns, "name": name}
 
     @staticmethod
     def _unpack_response(response):
-        if hasattr(response, '__dict__'):
+        if hasattr(response, "__dict__"):
             ret = {}
-            ordict = response.__dict__['__values__']
+            ordict = response.__dict__["__values__"]
             for k, v in ordict.items():
                 ret[k] = ClientWrapper._unpack_response(v)
             return ret
@@ -105,8 +113,10 @@ class ClientWrapper(object):
                 for operation_name, operation in port.binding._operations.items():
                     try:
                         prt[operation_name] = {
-                            io: ClientWrapper._parse_operation_signature(getattr(operation, io).signature())
-                            for io in ('input', 'output')
+                            io: ClientWrapper._parse_operation_signature(
+                                getattr(operation, io).signature()
+                            )
+                            for io in ("input", "output")
                         }
                     except Exception:
                         raise Exception(operation_name)
@@ -115,14 +125,20 @@ class ClientWrapper(object):
         wsdl = self.client.wsdl
         self.namespaces = wsdl.types.prefix_map
         self.elements = {
-            '{}:{}'.format(sig['namespace'], sig['name']): sig for sig in
-            [ClientWrapper._parse_element_signature(el.signature(schema=wsdl.types))
-             for el in wsdl.types.elements] if sig
+            "{}:{}".format(sig["namespace"], sig["name"]): sig
+            for sig in [
+                ClientWrapper._parse_element_signature(el.signature(schema=wsdl.types))
+                for el in wsdl.types.elements
+            ]
+            if sig
         }
         self.types = {
-            '{}:{}'.format(sig['namespace'], sig['name']): sig for sig in
-            [ClientWrapper._parse_type_signature(t.signature(schema=wsdl.types))
-             for t in wsdl.types.types] if sig
+            "{}:{}".format(sig["namespace"], sig["name"]): sig
+            for sig in [
+                ClientWrapper._parse_type_signature(t.signature(schema=wsdl.types))
+                for t in wsdl.types.types
+            ]
+            if sig
         }
 
     def bind(self, service_name=None, port_name=None):

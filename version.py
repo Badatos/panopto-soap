@@ -4,7 +4,7 @@ from os.path import abspath, dirname
 
 
 # Can use 'alpha', 'beta', 'release candidate', 'final'
-VERSION = (0, 0, 1, 'final', 0)
+VERSION = (0, 0, 1, "final", 0)
 
 
 def git_sha():
@@ -14,14 +14,14 @@ def git_sha():
             'cd "%s" && git log -1 --format=format:%%h' % loc,
             shell=True,
             stdout=PIPE,
-            stderr=PIPE
+            stderr=PIPE,
         )
         return p.communicate()[0]
     except Exception as err:
-        print('Error collecting git sha: [%s] %s' % (err, err.message))
+        print("Error collecting git sha: [%s] %s" % (err, err.message))
 
 
-def get_version(form='short'):
+def get_version(form="short"):
     """
     Return a version string for this package, based on `VERSION`.
 
@@ -40,60 +40,60 @@ def get_version(form='short'):
     """
     # Setup
     versions = {}
-    branch = '%s.%s' % (VERSION[0], VERSION[1])
+    branch = "%s.%s" % (VERSION[0], VERSION[1])
     tertiary = VERSION[2]
     type_ = VERSION[3]
-    final = (type_ == 'final')
+    final = type_ == "final"
     type_num = VERSION[4]
-    firsts = ''.join([x[0] for x in type_.split()])
+    firsts = "".join([x[0] for x in type_.split()])
     sha = git_sha()
-    local_version = ('%s' % sha) if sha else ''
+    local_version = ("%s" % sha) if sha else ""
 
     # Branch
-    versions['branch'] = branch
+    versions["branch"] = branch
 
     # Short
     v = branch
-    if (tertiary or final):
-        v += '.' + str(tertiary)
+    if tertiary or final:
+        v += "." + str(tertiary)
     if not final:
         v += firsts + str(type_num)
-    v += '+' + local_version
-    versions['short'] = v
+    v += "+" + local_version
+    versions["short"] = v
 
     # Normal
     v = branch
     if tertiary:
-        v += '.' + str(tertiary)
+        v += "." + str(tertiary)
     if not final:
-        v += ' ' + type_
+        v += " " + type_
         if type_num:
-            v += ' ' + str(type_num)
-    v += ' (%s)' % local_version
-    versions['normal'] = v
+            v += " " + str(type_num)
+    v += " (%s)" % local_version
+    versions["normal"] = v
 
     # Verbose
     v = branch
     if tertiary:
-        v += '.' + str(tertiary)
+        v += "." + str(tertiary)
     if not final:
-        v += ' ' + type_
+        v += " " + type_
         if type_num:
-            v += ' ' + str(type_num)
+            v += " " + str(type_num)
     else:
-        v += ' final'
-    v += ' (%s)' % local_version
-    versions['verbose'] = v
+        v += " final"
+    v += " (%s)" % local_version
+    versions["verbose"] = v
 
     try:
         return versions[form]
     except KeyError:
-        if form == 'all':
+        if form == "all":
             return versions
         raise TypeError('"%s" is not a valid form specifier.' % form)
 
 
-__version__ = get_version('short')
+__version__ = get_version("short")
 
-if __name__ == '__main__':
-    print(get_version('all'))
+if __name__ == "__main__":
+    print(get_version("all"))

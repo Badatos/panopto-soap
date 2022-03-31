@@ -12,9 +12,10 @@ class TestSoapApi(unittest.TestCase):
 
     def test_create_auth_client_factory(self):
         """Tests creating an auth client."""
-        host = 'localhost'
-        username = 'admin'
-        password = 'password'
+        host = "localhost"
+        username = "admin"
+        password = "password"
         auth = AuthenticatedClientFactory(
-            host, username, password, verify_ssl=host != 'localhost')
+            host, username, password, verify_ssl=host != "localhost"
+        )
         self.assertIsNotNone(auth)
