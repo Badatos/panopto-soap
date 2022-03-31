@@ -1,14 +1,18 @@
+"""Authenticated Client Factory."""
 from zeep import Client
-from ClientWrapper import ClientWrapper
+from panopto_api.ClientWrapper import ClientWrapper
 import urllib3
 
 
 class AuthenticatedClientFactory(object):
-    '''
+    """
     A class encapsulating the Panopto authentication protocol, using username/password specified at construction.
+
     Use the class to get clients for supported endpoints and authenticate them with the stored credentials.
-    '''
+    """
+
     def __init__(self, host, username, password, verify_ssl=True):
+        """Initialize."""
         self.host = host
         self.username = username
         self.password = password
@@ -28,10 +32,11 @@ class AuthenticatedClientFactory(object):
 
     @staticmethod
     def get_endpoint(service=None):
-        '''
+        """
         Obtain the fully-qualified endpoint for the specified service.
+
         If no service is specified, obtain a list of the supported services.
-        '''
+        """
         endpoints = {
             'AccessManagement': '4.0',
             'Auth': '4.2',
@@ -46,11 +51,13 @@ class AuthenticatedClientFactory(object):
             return sorted(endpoints.keys())
 
     def get_client(self, endpoint, over_ssl=False, authenticate_now=True, as_wrapper=True):
-        '''
-        Create a client to the specified endpoint with options:
+        """
+        Create a client to the specified endpoint.
+
+        options:
             over_ssl: hit the endpoint over ssl
             authenticate_now: authenticate the client with the factory's cookie
-        '''
+        """
         transport = None
         if not self.verify_ssl:
             from requests import Session
@@ -61,7 +68,7 @@ class AuthenticatedClientFactory(object):
         if endpoint in AuthenticatedClientFactory.get_endpoint():
             endpoint = AuthenticatedClientFactory.get_endpoint(endpoint)
         client = Client(
-            wsdl=self._decorate_endpoint(endpoint, over_ssl)+'?singleWsdl',
+            wsdl=self._decorate_endpoint(endpoint, over_ssl) + '?singleWsdl',
             transport=transport)
         if authenticate_now:
             self.authenticate_client(client)
@@ -70,9 +77,7 @@ class AuthenticatedClientFactory(object):
         return client
 
     def authenticate_factory(self):
-        '''
-        Authenticate the factory by renewing the cookie with stored credentials.
-        '''
+        """Authenticate the factory by renewing the cookie with stored credentials."""
         # need to hit auth endpoint over ssl to get cookie
         # but we might not be authenticated yet so explicitly don't authenticate the auth client!
         auth_endpoint = AuthenticatedClientFactory.get_endpoint('Auth')  # Panopto/PublicAPI/4.2/Auth.svc'
@@ -93,10 +98,11 @@ class AuthenticatedClientFactory(object):
         return False
 
     def authenticate_client(self, client):
-        '''
+        """
         Authenticate the client with the factory's cookie.
+
         If the factory doesn't have a cookie, authenticate the factory to get one.
-        '''
+        """
         if self.cookie is None:
             if not self.authenticate_factory():
                 return False

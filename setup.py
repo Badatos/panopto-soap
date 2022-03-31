@@ -18,7 +18,6 @@ setup(
     long_description=readme(),
     keywords=['python', 'panopto', 'lambda', 'api', 'soap'],
     install_requires=[
-        're',
         'urllib3',
         'zeep'
     ],
