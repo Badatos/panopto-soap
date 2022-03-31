@@ -1,3 +1,6 @@
+# CREATE DATABASE `panopto2pod`;
+# USE `panopto2pod`;
+
 # Liste les utilisateurs au format Pod, + les champs spécifiques à Panopto (panopto_name, panopto_id)
 # `main_id` sert à faire le lien entre plusieurs comptes (on y stocke l'id principal).
 # (Sur Panopto, un même utilisateur aura un compte différent pour chaque Moodle associé)

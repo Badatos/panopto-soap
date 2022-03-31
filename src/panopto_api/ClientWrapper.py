@@ -8,7 +8,8 @@ class ClientWrapper(object):
 
     zeep uses proxies to optimistically invoke services, ports, and operations,
     which may or may not exist in the wsdl.
-    This wrapper class inspects the wsdl to provide the available services, ports, and operations
+    This wrapper class inspects the wsdl to provide
+    the available services, ports, and operations
     in a pythonic way to make programatic discovery of the same easy.
     wsdl-specified namespaces and types are also exposed for convenience.
     In many cases, zeep can cons up those types from pythonic objects, but not always.
@@ -19,7 +20,8 @@ class ClientWrapper(object):
         """
         Parse operation signature.
 
-        Some operations return nothing, so their output signature is the empty string. Map that to None.
+        Some operations return nothing, so their output signature is the empty string.
+        Map that to None.
         Otherwise, rip apart the signature into names and types.
         """
         return (
@@ -53,7 +55,8 @@ class ClientWrapper(object):
                     memberlist.append(None)
                 else:
                     try:
-                        # name field is optional (not present for unnamed simple types), so parse from the back
+                        # name field is optional (not present for unnamed simple types),
+                        # so parse from the back
                         member = {
                             "namepsace": member_components[-2].strip(),
                             "type": member_components[-1],
@@ -158,7 +161,8 @@ class ClientWrapper(object):
         """
         Return the signature details of the specified operation within the currently bound service and port.
 
-        If unspecified or if the operation_name doesn't exist, return the supported operation names.
+        If unspecified or if the operation_name doesn't exist,
+         return the supported operation names.
         """
         operations = self.services[self.bound_service_name][self.bound_port_name]
         return operations.get(operation_name, sorted(operations.keys()))

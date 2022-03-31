@@ -1,7 +1,8 @@
 # flake8: noqa
-# note: move this exmaple into the directory with the src filesfrom __future__ import print_function
+# note: move this example into the directory with the src files
+from __future__ import print_function
 import zipfile
-from datetime import datetime, timedelta
+from datetime import datetime
 from io import BytesIO
 from AuthenticatedClientFactory import AuthenticatedClientFactory
 
