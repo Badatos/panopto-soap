@@ -3,17 +3,18 @@
 from panopto_api.AuthenticatedClientFactory import AuthenticatedClientFactory
 
 
-class PanoptoSession():
+class PanoptoSession:
     """Panopto SOAP API."""
 
     def __init__(self, host, username, password):
         """Initialize."""
         # create a client factory for making authenticated API requests
         self.auth = AuthenticatedClientFactory(
-            host, username, password, verify_ssl=host != 'localhost')
+            host, username, password, verify_ssl=host != "localhost"
+        )
 
-        self.sessions = self.auth.get_client('SessionManagement')
-        self.users = self.auth.get_client('UserManagement')
+        self.sessions = self.auth.get_client("SessionManagement")
+        self.users = self.auth.get_client("UserManagement")
 
     def updateFolderEnablePodcast(self, guid, enablePodcast=True):
         """
@@ -22,9 +23,7 @@ class PanoptoSession():
         Must be called by a creator or admin.
         """
         response = self.sessions.call_service(
-            'UpdateFolderEnablePodcast',
-            Guid=guid,
-            enablePodcast=enablePodcast
+            "UpdateFolderEnablePodcast", Guid=guid, enablePodcast=enablePodcast
         )
         return response
 
@@ -36,11 +35,9 @@ class PanoptoSession():
         @see https://support.panopto.com/resource/APIDocumentation/Help/html/93a3f1b2-d5f2-0d2e-25f4-43aebd25109f.htm
         """
         if not request:
-            request = {'Pagination': {'MaxNumberResults': 25, 'PageNumber': 0}}
+            request = {"Pagination": {"MaxNumberResults": 25, "PageNumber": 0}}
         response = self.sessions.call_service(
-            'GetFoldersList',
-            request=request,
-            searchQuery=searchQuery
+            "GetFoldersList", request=request, searchQuery=searchQuery
         )
         return response
 
@@ -57,18 +54,17 @@ class PanoptoSession():
         nbSessions = maxResults
         sessList = []
 
-        request = {'Pagination': {'MaxNumberResults': maxResults,
-                                  'PageNumber': pageNumber}}
+        request = {
+            "Pagination": {"MaxNumberResults": maxResults, "PageNumber": pageNumber}
+        }
         while nbSessions >= maxResults:
             print("Get Session list (page %s)" % pageNumber)
-            request['Pagination']['PageNumber'] = pageNumber
+            request["Pagination"]["PageNumber"] = pageNumber
             response = self.sessions.call_service(
-                'GetSessionsList',
-                request=request,
-                searchQuery=searchQuery
+                "GetSessionsList", request=request, searchQuery=searchQuery
             )
-            nbSessions = len(response['Results']['Session'])
-            sessList += response['Results']['Session']
+            nbSessions = len(response["Results"]["Session"])
+            sessList += response["Results"]["Session"]
             pageNumber += 1
         return sessList
 
@@ -84,9 +80,8 @@ class PanoptoSession():
         Can only be called by an admin
         """
         return self.users.call_service(
-            'ListUsers',
-            searchQuery=match_pattern,
-            parameters={})
+            "ListUsers", searchQuery=match_pattern, parameters={}
+        )
 
     def getUsers(self, userIds):
         """
@@ -94,6 +89,4 @@ class PanoptoSession():
 
         Can only be called by an admin
         """
-        return self.users.call_service(
-            'GetUsers',
-            userIds=userIds)
+        return self.users.call_service("GetUsers", userIds=userIds)

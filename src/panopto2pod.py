@@ -4,20 +4,21 @@ from mysql import connector
 from panopto_api.PanoptoAPI import PanoptoSession
 import logging
 import requests
+
 # import re
 
 import utils
 
 config = utils.read_config()
 
-migration_DB_HOST = config['migration_DB']['host']
-migration_DB_USER = config['migration_DB']['user']
-migration_DB_PASS = config['migration_DB']['password']
-migration_DB_NAME = config['migration_DB']['db_name']
+migration_DB_HOST = config["migration_DB"]["host"]
+migration_DB_USER = config["migration_DB"]["user"]
+migration_DB_PASS = config["migration_DB"]["password"]
+migration_DB_NAME = config["migration_DB"]["db_name"]
 
-host = config['Panopto']['host']
-username = config['Panopto']['username']
-password = config['Panopto']['password']
+host = config["Panopto"]["host"]
+username = config["Panopto"]["username"]
+password = config["Panopto"]["password"]
 
 log = logging.getLogger("panopto2pod")
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -29,10 +30,10 @@ log.setLevel(logging.INFO)
 log.addHandler(fileHandler)
 log.addHandler(streamHandler)
 
-GUID_TOPLEVEL = '00000000-0000-0000-0000-000000000000'
+GUID_TOPLEVEL = "00000000-0000-0000-0000-000000000000"
 
 
-class panopto2pod():
+class panopto2pod:
     """Panopto to Pod migration class."""
 
     def __init__(self, server_url):
@@ -57,9 +58,9 @@ class panopto2pod():
 
     def getBDD(self):
         """Get all ids from Panopto folder, session and user tables."""
-        self.populate("panopto_folder", 'nb_child', self.folderBDD)
-        self.populate("panopto_session", 'MP4Url', self.sessionBDD)
-        self.populate("auth_user", 'panopto_id', self.userBDD)
+        self.populate("panopto_folder", "nb_child", self.folderBDD)
+        self.populate("panopto_session", "MP4Url", self.sessionBDD)
+        self.populate("auth_user", "panopto_id", self.userBDD)
 
     def populate(self, table, col, dico):
         """Store a list of all ids from a DB table in a local dict."""
@@ -67,37 +68,41 @@ class panopto2pod():
         self.myCursor.execute(requete)
         data = self.myCursor.fetchall()
         for item in data:
-            dico[item['id']] = item[col]
+            dico[item["id"]] = item[col]
         return data
 
     def insertFolderBDD(self, folder, parent_id):
         """Insert a new folder in database."""
-        if folder['Id'] not in self.folderBDD.keys():
+        if folder["Id"] not in self.folderBDD.keys():
             requete = """
                       INSERT INTO panopto_folder (id, name, parent)
                       VALUES (%s, %s, %s)
                       """
-            self.myCursor.execute(requete,
-                                  (folder['Id'], folder['Name'], parent_id))
+            self.myCursor.execute(requete, (folder["Id"], folder["Name"], parent_id))
             self.conn.commit()
             print(self.myCursor.rowcount, " record inserted.")
-            self.folderBDD[folder['Id']] = None
+            self.folderBDD[folder["Id"]] = None
             log.info("# nb folders dans BDD : %s " % (len(self.folderBDD)))
 
     def insertUserBDD(self, user):
         """Insert a new user in database."""
-        if user['UserId'] not in self.userBDD.values():
+        if user["UserId"] not in self.userBDD.values():
             requete = """
                       INSERT INTO auth_user (first_name, last_name,
                       email, panopto_name, panopto_id)
                       VALUES (%s, %s, %s, %s, %s)
                       """
-            data = (user['FirstName'], user['LastName'], user['Email'],
-                    user['UserKey'], user['UserId'])
+            data = (
+                user["FirstName"],
+                user["LastName"],
+                user["Email"],
+                user["UserKey"],
+                user["UserId"],
+            )
             self.myCursor.execute(requete, data)
             self.conn.commit()
             print(self.myCursor.rowcount, " record inserted.")
-            self.userBDD[len(self.userBDD)] = user['UserId']
+            self.userBDD[len(self.userBDD)] = user["UserId"]
 
     def updateFolderBDD(self, folderId, nbChild):
         """Update amount of children of a folder in database."""
@@ -116,7 +121,9 @@ class panopto2pod():
                   UPDATE panopto_session
                   SET {field} = %s
                   WHERE Id = %s
-                  """.format(field=field)
+                  """.format(
+            field=field
+        )
         self.myCursor.execute(requete, (value, sessionId))
         self.conn.commit()
         log.info("panopto_session %s updated (%s=%s)." % (sessionId, field, value))
@@ -128,7 +135,9 @@ class panopto2pod():
                   UPDATE panopto_session
                   SET {mset} = %s
                   WHERE Id = '{id}'
-                  """.format(mset=mset, id=sessionId)
+                  """.format(
+            mset=mset, id=sessionId
+        )
 
         self.myCursor.execute(requete, values)
         self.conn.commit()
@@ -138,9 +147,9 @@ class panopto2pod():
         """Insert multiple new folders in database."""
         data = []
         for folder in folders:
-            if folder['Id'] not in self.folderBDD.keys():
-                data.append((folder['Id'], folder['Name'], parent_id))
-                self.folderBDD[folder['Id']] = None
+            if folder["Id"] not in self.folderBDD.keys():
+                data.append((folder["Id"], folder["Name"], parent_id))
+                self.folderBDD[folder["Id"]] = None
 
         requete = """
                   INSERT INTO panopto_folder (id, name, parent)
@@ -155,23 +164,45 @@ class panopto2pod():
         data = []
         newIds = []
         updated = 0
-        updateFields = ["MP4Url", "State", "StatusMessage", "IsBroadcast",
-                        "IsDownloadable", "CreatorId"]
+        updateFields = [
+            "MP4Url",
+            "State",
+            "StatusMessage",
+            "IsBroadcast",
+            "IsDownloadable",
+            "CreatorId",
+        ]
         for sess in sessions:
-            if sess['Id'] not in self.sessionBDD.keys():
-                data.append((sess['Id'], sess['Name'], sess['Description'],
-                             sess['FolderId'], sess['StartTime'], sess['Duration'],
-                             sess['CreatorId'], sess["MP4Url"], sess["State"],
-                             sess["StatusMessage"], sess["IsBroadcast"],
-                             sess["IsDownloadable"]))
-                self.sessionBDD[sess['Id']] = sess['MP4Url']
-                newIds.append(sess['Id'])
+            if sess["Id"] not in self.sessionBDD.keys():
+                data.append(
+                    (
+                        sess["Id"],
+                        sess["Name"],
+                        sess["Description"],
+                        sess["FolderId"],
+                        sess["StartTime"],
+                        sess["Duration"],
+                        sess["CreatorId"],
+                        sess["MP4Url"],
+                        sess["State"],
+                        sess["StatusMessage"],
+                        sess["IsBroadcast"],
+                        sess["IsDownloadable"],
+                    )
+                )
+                self.sessionBDD[sess["Id"]] = sess["MP4Url"]
+                newIds.append(sess["Id"])
             else:
                 updated += 1
-                values = (sess["MP4Url"], sess["State"],
-                          sess["StatusMessage"], sess["IsBroadcast"],
-                          sess["IsDownloadable"], sess["CreatorId"])
-                self.updateFieldsSessionBDD(sess['Id'], values, updateFields)
+                values = (
+                    sess["MP4Url"],
+                    sess["State"],
+                    sess["StatusMessage"],
+                    sess["IsBroadcast"],
+                    sess["IsDownloadable"],
+                    sess["CreatorId"],
+                )
+                self.updateFieldsSessionBDD(sess["Id"], values, updateFields)
 
         print("%s sessions updated in DB." % updated)
         print("Inserting %s new sessions in DB." % len(data))
@@ -204,7 +235,7 @@ class panopto2pod():
         podcasts = self.myCursor.fetchall()
         log.info("%s podcasts missing file size in DB" % len(podcasts))
         for pod in podcasts:
-            self.updatePodcastSize(pod['id'])
+            self.updatePodcastSize(pod["id"])
 
     def updatePodcastSize(self, sessionId):
         """Update Podcast size in BDD."""
@@ -213,7 +244,7 @@ class panopto2pod():
         if url:
             resp = requests.get(url=url, stream=True)
             try:
-                file_size = resp.headers['Content-Length']
+                file_size = resp.headers["Content-Length"]
             except KeyError:
                 if resp.status_code == 403:
                     print("%s - Download forbidden." % sessionId)
@@ -250,13 +281,13 @@ class panopto2pod():
         users = self.myCursor.fetchall()
         print("%s missing usernames" % len(users))
         for user in users:
-            username = user['panopto_name'].split('\\')[-1]
+            username = user["panopto_name"].split("\\")[-1]
             requete = """
                   UPDATE auth_user
                   SET username = %s
                   WHERE Id = %s
                   """
-            self.myCursor.execute(requete, (username, user['id']))
+            self.myCursor.execute(requete, (username, user["id"]))
         self.conn.commit()
 
     def updateUserIds(self):
@@ -272,7 +303,7 @@ class panopto2pod():
             host=migration_DB_HOST,
             user=migration_DB_USER,
             password=migration_DB_PASS,
-            database='pod',
+            database="pod",
         )
         cursorPod = connPod.cursor(dictionary=True)
         # On ne prend que les comptes sans doublon
@@ -280,9 +311,9 @@ class panopto2pod():
                         WHERE main_id IS NULL
                         AND email = '%s'"""
         for user in my_users:
-            if user['email'] != '':
-                print("%s" % user['email'])
-                cursorPod.execute(requetePod % user['email'])
+            if user["email"] != "":
+                print("%s" % user["email"])
+                cursorPod.execute(requetePod % user["email"])
                 pod_user = cursorPod.fetchone()
                 if pod_user:
                     requete = """UPDATE auth_user
@@ -291,7 +322,7 @@ class panopto2pod():
                                  WHERE panopto_id = %s
                               """
 
-                    self.myCursor.execute(requete, (pod_user['id'], user['panopto_id']))
+                    self.myCursor.execute(requete, (pod_user["id"], user["panopto_id"]))
                     n += 1
 
         print("%s updateUserIds DONE. (%s errors)" % (n, e))
@@ -310,16 +341,16 @@ class panopto2pod():
             # On cherche l'utilisateur actif ayant cet username.
             req = """SELECT id FROM auth_user
                 WHERE is_active = 1 AND username = %s"""
-            self.myCursor.execute(req, [d['username']])
+            self.myCursor.execute(req, [d["username"]])
             main_user = self.myCursor.fetchone()
             if main_user:
                 # On indique son id dans le champ 'main_id' des doublons
                 req = """UPDATE auth_user
                   SET main_id = %s
                   WHERE is_active = 0 AND username = %s"""
-                self.myCursor.execute(req, (main_user['id'], d['username']))
+                self.myCursor.execute(req, (main_user["id"], d["username"]))
             else:
-                print("aucun user principal trouvé pour %s" % d['username'])
+                print("aucun user principal trouvé pour %s" % d["username"])
         self.conn.commit()
 
     def InsertOrUpdatePods(self):
@@ -335,26 +366,31 @@ class panopto2pod():
         # On crée un dico des users en tenant compte des doublons
         inv_users = {}
         for u in users:
-            if u['main_id']:
-                inv_users[u['panopto_id']] = u['main_id']
+            if u["main_id"]:
+                inv_users[u["panopto_id"]] = u["main_id"]
             else:
-                inv_users[u['panopto_id']] = u['id']
+                inv_users[u["panopto_id"]] = u["id"]
 
         data = []
         for sess in sessions:
 
-            owner_id = inv_users[sess['CreatorId']]
-            if sess['Description']:
-                desc = sess['Description']
+            owner_id = inv_users[sess["CreatorId"]]
+            if sess["Description"]:
+                desc = sess["Description"]
             else:
                 desc = ""
             # if sess['id'] == '0b40341c-d33e-4549-ba23-ae4c00b4b7db':
-            log.debug("SESSION = %s (%s)" % (sess['id'], owner_id))
-            data = (sess['id'], sess['Name'],
-                    desc, sess['StartTime'],
-                    sess['StartTime'],
-                    sess['Duration'], owner_id,
-                    sess['MP4Url'])
+            log.debug("SESSION = %s (%s)" % (sess["id"], owner_id))
+            data = (
+                sess["id"],
+                sess["Name"],
+                desc,
+                sess["StartTime"],
+                sess["StartTime"],
+                sess["Duration"],
+                owner_id,
+                sess["MP4Url"],
+            )
             requete = """
                       INSERT INTO pods_pod
                       (panopto_session, title, description,
