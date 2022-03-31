@@ -46,19 +46,50 @@ Updating dependencies
     $ python3 -m pip install -r requirements.txt
 
 
-Pushing a new build of the package
-----------------------------------
+Mode d’emploi
+=============
 
-Make sure everything builds
-
-.. code:: console
-
-    $ tox
-
-If that succeeds, then you can push a source package to artifactory
-(This assumes that you've defined our local artifactory as "local" in
-~/.pypirc).
+Pré-requis
+----------
+Dupliquez le fichier settings-dist.ini en settings.ini dans le dossier config, et indiquez-y vos infos.
 
 .. code:: console
 
-    $ python setup.py bdist_wheel --universal upload -r local
+    $ cp config/settings-dist.ini config/settings.ini
+
+Étape 1
+-------
+Créez une base de donnée locale.
+Nous utilisons par exemple mysql.
+Pour créer l'ensemble des tables nécessaires, lancez `make createDB`.
+N'oubliez-pas d'indiquer dans votre settings.ini les infos de votre DB sous "[migration_DB]".
+
+
+Étape 2
+-------
+Assurez-vous d'avoir rempli les infos [Panopto] de votre settings.ini
+Lancez la commande `make import_sessions' pour remplir la BDD locale avec l'ensemble des session de Panopto.
+
+Étape 3
+-------
+Lancer ensuite une premiere fois le script `make export_json` pour obtenir un fichier User.json des utilisateurs de Panopto.
+
+Étape 4
+-------
+Rendez-vous sur Pod pour importer le json obtenu ci-dessus.
+(suivez la doc https://www.esup-portail.org/wiki/display/ES/Reprise+de+l%27existant%2C+entre+la+version+1.x+et+2.x)
+
+Étape 5
+-------
+À partir de là, c'est pas surper propre désolé ^^.
+Maintenant qu'on a importé les utilisateurs dans Pod, il faut maj la base locale.
+Appelez en python 'export2json.synchroPodUsers()'
+
+Étape 6
+-------
+# Quand on est certains de tous nos ids utilisateurs, on exporte les vidéos
+Appelez en python 'export2json.exportPods()'
+
+Étape 7
+-------
+Retournez sur Pod pour importer le json obtenu ci-dessus.

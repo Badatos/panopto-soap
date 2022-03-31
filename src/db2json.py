@@ -187,11 +187,12 @@ class export2json:
 export2json = export2json()
 # Pré-requis :
 # * disposer des bonnes configs dans le fichier /config/settings.ini
-# * Avoir préalablement lancé `python 3 panopto2pod.py' pour remplir la BDD locale
-# Lancer ensuite plusieurs fois ce script en retirant les commantaire de chaque étape ci-dessous :
+# * Avoir préalablement lancé `python3 panopto2pod.py' pour remplir la BDD locale
+# Lancer ensuite plusieurs fois ce script en retirant successivement
+# les commentaires de chaque étape ci-dessous :
 
 # étape 1 : exporter les utilisteurs vers Pod
-# export2json.exportUsers()
+export2json.exportUsers()
 
 # étape 2 : depuis pod, importer le json obtenu ci-dessus
 
