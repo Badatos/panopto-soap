@@ -1,4 +1,5 @@
 #!/usr/bin/python
+"""panopto-python-soap setup class."""
 
 from setuptools import setup, find_packages
 from version import get_version

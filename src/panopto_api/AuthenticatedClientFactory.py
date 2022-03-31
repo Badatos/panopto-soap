@@ -5,20 +5,24 @@ import urllib3
 
 
 class AuthenticatedClientFactory(object):
-    '''
-    A class encapsulating the Panopto authentication protocol, using either
+    """
+    A class encapsulating the Panopto authentication protocol.
+
+    It use either
      - an oauth token
         - instructions to get one here: https://support.panopto.com/s/article/oauth2-for-services
         - code examples here: https://github.com/Panopto/panopto-api-python-examples
      - or username/password
     specified at construction.
     Use the class to get clients for supported endpoints and authenticate them with the stored credentials.
-    '''
+    """
+
     def __init__(self, host,
-                cookie=None,
-                oauth_token=None,
-                username=None, password=None,
-                verify_ssl=True):
+                 cookie=None,
+                 oauth_token=None,
+                 username=None, password=None,
+                 verify_ssl=True):
+        """Initialize."""
         self.host = host
         self.cookie = cookie
         self.oauth_token = oauth_token
@@ -31,13 +35,11 @@ class AuthenticatedClientFactory(object):
             # about the dangers of making calls therefrom. disable those warnings.
             urllib3.disable_warnings()
 
-
     def _decorate_endpoint(self, endpoint_path, over_ssl=False):
         return 'http{}://{}/{}'.format(
             's' if over_ssl else '',
             self.host,
             endpoint_path)
-
 
     @staticmethod
     def get_endpoint(service=None):
@@ -59,10 +61,11 @@ class AuthenticatedClientFactory(object):
         else:
             return sorted(endpoints.keys())
 
-
     def get_client(self, endpoint, over_ssl=True, authenticate_now=True, as_wrapper=True):
-        '''
-        Create a client to the specified endpoint with options:
+        """
+        Create a client to the specified endpoint.
+
+        options:
             over_ssl: hit the endpoint over ssl
             authenticate_now: authenticate the client with the factory's cookie
         """
@@ -84,11 +87,8 @@ class AuthenticatedClientFactory(object):
             client = ClientWrapper(client)
         return client
 
-
     def authenticate_factory(self):
-        '''
-        Authenticate the factory by renewing the cookie with stored credentials.
-        '''
+        """Authenticate the factory by renewing the cookie with stored credentials."""
         # prefer oauth when specified
         if self.oauth_token:
             # call "legacy" auth REST endpoint to get a cookie from an oauth token
@@ -118,7 +118,6 @@ class AuthenticatedClientFactory(object):
                     return True
 
         return False
-
 
     def authenticate_client(self, client):
         """

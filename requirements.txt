@@ -1,1 +1,9 @@
-zeep
+urllib3 >= 1.26
+
+zeep == 3.4.0; python_version <= '3.5'
+zeep >= 4; python_version >= '3.6'
+
+# for use with MySQL Server 8.0, 5.7, and 5.6
+mysql-connector-python >=8; python_version >= '3.6'
+# for use with MySQL Server 3.23 through 5.5
+mysql-python == 1.2.5; python_version <= '2.7'

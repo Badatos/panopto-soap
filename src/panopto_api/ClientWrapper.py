@@ -132,7 +132,6 @@ class ClientWrapper(object):
         If either is unspecified, the default is used. In most cases, that's desired.
         """
         service_name = service_name or list(self.services.keys())[0]
-        # print("Bind service_name=%s" % service_name)
         port_name = port_name or list(self.services[service_name].keys())[0]
         self._service = self.client.bind(service_name, port_name)
         self.bound_service_name = service_name
