@@ -1,7 +1,7 @@
-python-soap
-===========
+Panopto python-soap
+===================
 
-a python 3 soap Panopto API client that wraps the zeep library for the heavy lifting
+A python 3 soap Panopto API client that wraps the zeep library for the heavy lifting
 
 THIS REPOSITORY IS UNSUPPORTED
 ------------------------------
@@ -40,10 +40,6 @@ limitations under the License.
 
 Updating dependencies
 ---------------------
-This package has dependencies defined in two places: setup.py and requirements-dev.txt
-The **abstract** dependencies defined in requirements.txt are required for **module dependencies**.
-The **abstract** dependencies defined in requirements-dev.txt are only needed for **test and development** dependencies.
-
 
 .. code:: console
 
