@@ -6,6 +6,7 @@ from version import get_version
 
 
 def readme():
+    """Return the README file."""
     with open("README.rst") as f:
         return f.read()
 

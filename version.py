@@ -1,13 +1,15 @@
+"""Generate a version number with current git sha."""
 from __future__ import print_function
 from subprocess import Popen, PIPE
 from os.path import abspath, dirname
 
 
 # Can use 'alpha', 'beta', 'release candidate', 'final'
-VERSION = (0, 0, 1, "final", 0)
+VERSION = (0, 0, 2, "alpha", 0)
 
 
 def git_sha():
+    """Return current git sha."""
     loc = abspath(dirname(__file__))
     try:
         p = Popen(

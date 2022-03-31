@@ -17,13 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Configure sysctl limits (for ES)
-        run: |
-          sudo swapoff -a
-          sudo sysctl -w vm.swappiness=1
-          sudo sysctl -w fs.file-max=262144
-          sudo sysctl -w vm.max_map_count=262144
-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -43,4 +36,4 @@ jobs:
 
       - name: Flake8 compliance
         run: |
-          flake8 --max-complexity=7 --ignore=E501,W503,E203 --exclude .git
+          flake8
