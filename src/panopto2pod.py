@@ -404,4 +404,3 @@ for sess in newIds:
 panopto2pod.updateCreators()
 """Insert/Update pods from Panopto session (update if exists)."""
 panopto2pod.InsertOrUpdatePods()
-
