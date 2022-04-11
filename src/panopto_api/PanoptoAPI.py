@@ -10,8 +10,10 @@ class PanoptoSession:
         """Initialize."""
         # create a client factory for making authenticated API requests
         self.auth = AuthenticatedClientFactory(
-            host=host, username=username,
-            password=password, verify_ssl=host != "localhost"
+            host=host,
+            username=username,
+            password=password,
+            verify_ssl=host != "localhost",
         )
 
         self.sessions = self.auth.get_client("SessionManagement")
