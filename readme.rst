@@ -67,8 +67,8 @@ N'oubliez-pas d'indiquer dans votre settings.ini les infos de votre DB sous "[mi
 
 Étape 2
 -------
-Assurez-vous d'avoir rempli les infos [Panopto] de votre settings.ini
-Lancez la commande `make import_sessions' pour remplir la BDD locale avec l'ensemble des session de Panopto.
+Assurez-vous d’avoir rempli les infos [Panopto] de votre settings.ini
+Lancez la commande `make import_sessions` pour remplir la BDD locale avec l'ensemble des sessions de Panopto.
 
 Étape 3
 -------
@@ -81,14 +81,14 @@ Rendez-vous sur Pod pour importer le json obtenu ci-dessus.
 
 Étape 5
 -------
-À partir de là, c'est pas surper propre désolé ^^.
-Maintenant qu'on a importé les utilisateurs dans Pod, il faut maj la base locale.
-Appelez en python 'export2json.synchroPodUsers()'
+À partir de là, c’est pas super propre désolé ^^.
+Maintenant qu’on a importé les utilisateurs dans Pod, il faut maj la base locale.
+Appelez en python `export2json.synchroPodUsers()`
 
 Étape 6
 -------
-# Quand on est certains de tous nos ids utilisateurs, on exporte les vidéos
-Appelez en python 'export2json.exportPods()'
+Quand on est certains de tous nos ids utilisateurs, on exporte les vidéos.
+Appelez en python `export2json.exportPods()`
 
 Étape 7
 -------

@@ -10,7 +10,8 @@ class PanoptoSession:
         """Initialize."""
         # create a client factory for making authenticated API requests
         self.auth = AuthenticatedClientFactory(
-            host, username, password, verify_ssl=host != "localhost"
+            host=host, username=username,
+            password=password, verify_ssl=host != "localhost"
         )
 
         self.sessions = self.auth.get_client("SessionManagement")
@@ -63,9 +64,15 @@ class PanoptoSession:
             response = self.sessions.call_service(
                 "GetSessionsList", request=request, searchQuery=searchQuery
             )
-            nbSessions = len(response["Results"]["Session"])
-            sessList += response["Results"]["Session"]
-            pageNumber += 1
+            if response["Results"]:
+                sess = response["Results"]["Session"]
+                nbSessions = len(sess)
+                sessList += sess
+                pageNumber += 1
+            else:
+                print("0 SESSION FOUND. %s" % response)
+                print("REQUEST: %s" % request)
+                break
         return sessList
 
     """
